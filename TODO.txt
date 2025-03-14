@@ -1,0 +1,3 @@
+1) Text recognition and selection
+2) Find and search
+3) AI and NLP for sentiment analysis and music toggle. Preset musics based on moods as of now

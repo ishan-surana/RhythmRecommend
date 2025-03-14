@@ -1,0 +1,104 @@
+package com.example.rhythmrecommend;
+
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+    private Button selectPdfButton;
+    private FloatingActionButton settingsButton;
+
+    // Declare an ActivityResultLauncher to launch the file picker
+    private final ActivityResultLauncher<String> getContentLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
+                @Override
+                public void onActivityResult(Uri uri) {
+                    if (uri != null) {
+                        Intent intent = new Intent(MainActivity.this, ReadingActivity.class);
+                        intent.setData(uri);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to select PDF.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+    );
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Initialize the select PDF button and set its click listener
+        selectPdfButton = findViewById(R.id.select_pdf_button);
+        selectPdfButton.setOnClickListener(view -> getContentLauncher.launch("application/pdf"));
+
+        settingsButton = findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(View -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+
+        // Find views
+        RecyclerView recentBooksRecyclerView = findViewById(R.id.recent_books_recycler_view);
+        // Set up RecyclerView
+        recentBooksRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        BookAdapter bookAdapter = new BookAdapter(getRecentPDFs(getContentResolver())); // Get the recent PDFs
+        recentBooksRecyclerView.setAdapter(bookAdapter);
+    }
+
+    // Fetch recent PDFs based on the last modified timestamp
+    public static List<File> getRecentPDFs(ContentResolver contentResolver) {
+        List<File> pdfFiles = new ArrayList<>();
+
+        // Define the Uri for MediaStore
+        Uri uri = MediaStore.Files.getContentUri("external");
+
+        // Query to fetch recent PDFs
+        String[] projection = {MediaStore.Files.FileColumns.DATA};  // Path to the file
+        String selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?";
+        String[] selectionArgs = {"application/pdf"};
+        String sortOrder = MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC";  // Sort by recent access
+
+        // Query to get the files
+        try (Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int count = 0;  // Counter to limit results to 4
+                do {
+                    String filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA));
+                    File pdfFile = new File(filePath);  // Create a File object
+                    if (pdfFile.exists()) {
+                        pdfFiles.add(pdfFile);  // Add the File object to the list
+                        count++;
+                    }
+                    if (count >= 4) {
+                        break;  // Stop if we've collected 4 recent PDFs
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("RecentFiles", "Error fetching recent PDFs", e);
+        }
+        return pdfFiles;
+    }
+}
