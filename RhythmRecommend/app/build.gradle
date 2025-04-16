@@ -50,4 +50,5 @@ dependencies {
     implementation libs.pdf.viewer
     implementation libs.pdfbox
     implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+    implementation 'com.github.addisonelliott:SegmentedButton:3.1.9'
 }

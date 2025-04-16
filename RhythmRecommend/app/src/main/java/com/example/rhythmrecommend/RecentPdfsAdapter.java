@@ -62,26 +62,54 @@ public class RecentPdfsAdapter extends RecyclerView.Adapter<RecentPdfsAdapter.Re
         return recentPdfs.size();
     }
 
+//    private Bitmap generatePdfThumbnail(Uri pdfUri) {
+//        Bitmap bitmap = null;
+//        try {
+//            // Use ContentResolver to open the PDF as InputStream
+//            InputStream inputStream = context.getContentResolver().openInputStream(pdfUri);
+//
+//            // Use PdfRenderer with ParcelFileDescriptor from InputStream
+//            if (inputStream != null) {
+//                ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorFromInputStream(inputStream);
+//                if (parcelFileDescriptor != null) {
+//                    PdfRenderer pdfRenderer = new PdfRenderer(parcelFileDescriptor);
+//                    PdfRenderer.Page page = pdfRenderer.openPage(0);  // Open the first page
+//
+//                    // Scale the page to fit within the thumbnail
+//                    int width = 200;  // Set desired width for the thumbnail
+//                    int height =200;  // Make 1:1 aspect ratio
+//
+//                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+//
+//                    page.close();
+//                    pdfRenderer.close();
+//                }
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return bitmap;
+//    }
+
     private Bitmap generatePdfThumbnail(Uri pdfUri) {
         Bitmap bitmap = null;
         try {
-            // Use ContentResolver to open the PDF as InputStream
-            InputStream inputStream = context.getContentResolver().openInputStream(pdfUri);
+            // Request a FileDescriptor from the content URI
+            ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(pdfUri, "r");
 
-            // Use PdfRenderer with ParcelFileDescriptor from InputStream
-            if (inputStream != null) {
-                ParcelFileDescriptor parcelFileDescriptor = getFileDescriptorFromInputStream(inputStream);
-                if (parcelFileDescriptor != null) {
-                    PdfRenderer pdfRenderer = new PdfRenderer(parcelFileDescriptor);
-                    PdfRenderer.Page page = pdfRenderer.openPage(0);  // Open the first page
+            if (parcelFileDescriptor != null) {
+                PdfRenderer pdfRenderer = new PdfRenderer(parcelFileDescriptor);
 
-                    // Scale the page to fit within the thumbnail
-                    int width = 200;  // Set desired width for the thumbnail
-                    int height =200;  // Make 1:1 aspect ratio
+                // Ensure the PDF has at least one page
+                if (pdfRenderer.getPageCount() > 0) {
+                    PdfRenderer.Page page = pdfRenderer.openPage(0);  // Open the first page of the PDF
+                    int width = 200;
+                    int height = 200;
 
                     bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
+                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
                     page.close();
                     pdfRenderer.close();
                 }
@@ -94,25 +122,25 @@ public class RecentPdfsAdapter extends RecyclerView.Adapter<RecentPdfsAdapter.Re
     }
 
     // Helper method to get ParcelFileDescriptor from InputStream
-    private ParcelFileDescriptor getFileDescriptorFromInputStream(InputStream inputStream) {
-        try {
-            File file = new File(context.getCacheDir(), "temp.pdf");
-            file.deleteOnExit();
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                // Copy InputStream to a temporary file
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
-            // Return ParcelFileDescriptor for PdfRenderer
-            return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    private ParcelFileDescriptor getFileDescriptorFromInputStream(InputStream inputStream) {
+//        try {
+//            File file = new File(context.getCacheDir(), "temp.pdf");
+//            file.deleteOnExit();
+//            try (FileOutputStream out = new FileOutputStream(file)) {
+//                // Copy InputStream to a temporary file
+//                byte[] buffer = new byte[1024];
+//                int bytesRead;
+//                while ((bytesRead = inputStream.read(buffer)) != -1) {
+//                    out.write(buffer, 0, bytesRead);
+//                }
+//            }
+//            // Return ParcelFileDescriptor for PdfRenderer
+//            return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
 
     public static class RecentPdfViewHolder extends RecyclerView.ViewHolder {

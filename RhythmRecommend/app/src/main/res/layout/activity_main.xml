@@ -10,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
+        android:fontFamily="@font/montserrat_medium"
         android:text="Rhythm Recommend"
         android:textSize="26sp"
         android:textStyle="bold"
@@ -19,9 +20,10 @@
 
     <TextView
         android:id="@+id/recent_books_title3"
-        android:layout_width="304dp"
+        android:layout_width="351dp"
         android:layout_height="37dp"
         android:layout_marginTop="12dp"
+        android:fontFamily="@font/montserrat_medium"
         android:text="The smart e-book reader, which automatically changes the music as you read."
         android:textAlignment="center"
         android:textColor="#777777"
@@ -31,14 +33,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/app_title" />
 
+<!--    android:backgroundTint="#F44336"-->
     <Button
         android:id="@+id/select_pdf_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:backgroundTint="#6200EE"
         android:text="Browse PDF on device"
-        android:textColor="#FFFFFF"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.514"
@@ -89,7 +90,7 @@
         android:layout_height="56dp"
         android:src="@drawable/ic_settings"
         android:contentDescription="Settings"
-        android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
